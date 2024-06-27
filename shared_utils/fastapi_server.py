@@ -47,6 +47,9 @@ queue cocurrent effectiveness
 import os, requests, threading, time
 import uvicorn
 
+from shared_utils.config_loader import safe_get_conf
+
+
 def validate_path_safety(path_or_url, user):
     from toolbox import get_conf, default_user_name
     from toolbox import FriendlyException
@@ -218,6 +221,24 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
 
     # --- --- FastAPI --- ---
     fastapi_app = FastAPI(lifespan=app_lifespan)
+
+    # --- --- CORS Hack --- ---
+    allow_origin, allow_headers, allow_methods = safe_get_conf("ALLOW_ORIGIN", "ALLOW_HEADERS", "ALLOW_METHODS")
+    if allow_origin is None:
+        allow_origin = []
+    if allow_headers is None:
+        allow_headers = []
+    if allow_methods is None:
+        allow_methods = []
+
+    @fastapi_app.options("/*")
+    async def options(request: fastapi.Request):
+        res = fastapi.responses.HTTPOk
+        res.headers["Access-Control-Allow-Origin"] = ",".join(allow_origin)
+        res.headers["Access-Control-Allow-Headers"] = ",".join(allow_headers)
+        res.headers["Access-Control-Allow-Methods"] = ",".join(allow_methods)
+        return res
+
     fastapi_app.mount(CUSTOM_PATH, gradio_app)
 
     # --- --- favicon --- ---

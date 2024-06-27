@@ -99,6 +99,33 @@ def read_single_conf_with_lru_cache(arg):
     return r
 
 
+def safe_read_single_conf_with_lru_cache(arg):
+    try:
+        return read_single_conf_with_lru_cache(arg)
+    except:
+        return None
+
+
+@lru_cache(maxsize=128)
+def safe_get_conf(*args):
+    """
+    safe_get_conf 功能与 get_conf 相同，但当conf不存在时，get_conf 会读取失败，而 safe_get_conf 返回 None。
+    本项目的所有配置都集中在config.py中。 修改配置有三种方法，您只需要选择其中一种即可：
+
+        - 直接修改config.py
+        - 创建并修改config_private.py
+        - 修改环境变量（修改docker-compose.yml等价于修改容器内部的环境变量）
+
+    注意：如果您使用docker-compose部署，请修改docker-compose（等价于修改容器内部的环境变量）
+    """
+    res = []
+    for arg in args:
+        r = safe_read_single_conf_with_lru_cache(arg)
+        res.append(r)
+    if len(res) == 1: return res[0]
+    return res
+
+
 @lru_cache(maxsize=128)
 def get_conf(*args):
     """

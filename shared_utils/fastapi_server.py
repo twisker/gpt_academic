@@ -114,6 +114,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
     import fastapi
     import gradio as gr
     from fastapi import FastAPI
+    from fastapi.middleware.cors import CORSMiddleware
     from gradio.routes import App
     from toolbox import get_conf
     CUSTOM_PATH, PATH_LOGGING = get_conf('CUSTOM_PATH', 'PATH_LOGGING')
@@ -223,21 +224,24 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
     fastapi_app = FastAPI(lifespan=app_lifespan)
 
     # --- --- CORS Hack --- ---
-    allow_origin, allow_headers, allow_methods = safe_get_conf("ALLOW_ORIGIN", "ALLOW_HEADERS", "ALLOW_METHODS")
-    if allow_origin is None:
-        allow_origin = []
+    allow_origins, allow_headers, allow_methods, allow_credentials = safe_get_conf(
+        "ALLOW_ORIGINS", "ALLOW_HEADERS", "ALLOW_METHODS", "ALLOW_CREDENTIALS")
+    if allow_origins is None:
+        allow_origins = []
     if allow_headers is None:
         allow_headers = []
     if allow_methods is None:
         allow_methods = []
+    if allow_credentials is None:
+        allow_credentials = False
 
-    @fastapi_app.options("/*")
-    async def options(request: fastapi.Request):
-        res = fastapi.responses.HTTPOk
-        res.headers["Access-Control-Allow-Origin"] = ",".join(allow_origin)
-        res.headers["Access-Control-Allow-Headers"] = ",".join(allow_headers)
-        res.headers["Access-Control-Allow-Methods"] = ",".join(allow_methods)
-        return res
+    fastapi_app.add_middleware(
+        CORSMiddleware,
+        allow_headers=allow_headers,
+        allow_methods=allow_methods,
+        allow_origins=allow_origins,
+        allow_credentials=allow_credentials
+    )
 
     fastapi_app.mount(CUSTOM_PATH, gradio_app)
 

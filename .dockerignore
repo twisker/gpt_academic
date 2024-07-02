@@ -1,5 +1,5 @@
 academic.tar.gz
-config_private.py
-gpt_log/
 .venv/
 .github/
+gpt_log/
+config_private.py

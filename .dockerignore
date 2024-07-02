@@ -1,0 +1,5 @@
+academic.tar.gz
+config_private.py
+gpt_log/
+.venv/
+.github/

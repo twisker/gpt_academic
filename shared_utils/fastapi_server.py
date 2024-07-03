@@ -47,8 +47,6 @@ queue cocurrent effectiveness
 import os, requests, threading, time
 import uvicorn
 
-from shared_utils.config_loader import safe_get_conf
-
 
 def validate_path_safety(path_or_url, user):
     from toolbox import get_conf, default_user_name
@@ -224,7 +222,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
     fastapi_app = FastAPI(lifespan=app_lifespan)
 
     # --- --- CORS Hack --- ---
-    allow_origins, allow_headers, allow_methods, allow_credentials = safe_get_conf(
+    allow_origins, allow_headers, allow_methods, allow_credentials = get_conf(
         "ALLOW_ORIGINS", "ALLOW_HEADERS", "ALLOW_METHODS", "ALLOW_CREDENTIALS")
     if allow_origins is None:
         allow_origins = []

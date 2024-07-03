@@ -12,7 +12,7 @@ import logging
 import uuid
 from functools import wraps
 from textwrap import dedent
-from shared_utils.config_loader import get_conf, safe_get_conf
+from shared_utils.config_loader import get_conf
 from shared_utils.config_loader import set_conf
 from shared_utils.config_loader import set_multi_conf
 from shared_utils.config_loader import read_single_conf_with_lru_cache
